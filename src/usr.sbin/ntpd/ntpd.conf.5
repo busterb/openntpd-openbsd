@@ -38,9 +38,14 @@ The basic configuration options are as follows:
 .It Xo Ic listen on Ar address
 .Op Ic rtable Ar table-id
 .Xc
+.Xr ntpd 8
+has the ability to sync the local clock to remote NTP servers and, if
+this directive is specified, can act as NTP server itself, redistributing the
+local clock.
+.Pp
 Specify a local IP address or a hostname the
 .Xr ntpd 8
-daemon should listen on.
+daemon should listen on to enable remote clients synchronization.
 If it appears multiple times,
 .Xr ntpd 8
 will listen on each given address.
@@ -53,7 +58,7 @@ will listen on all local addresses using the specified routing table.
 does not listen on any address by default.
 The optional
 .Ic rtable
-keyword will specify which routing table to listen on.
+keyword will specify which routing table to listen on, if the operating system supports rdomains.
 By default
 .Xr ntpd 8
 will listen using the current routing table.
@@ -87,7 +92,7 @@ query from 2001:db8::1
 .Xc
 Specify a timedelta sensor device
 .Xr ntpd 8
-should use.
+should use, if the operating system supports sensors.
 The sensor can be specified multiple times:
 .Xr ntpd 8
 will use each given sensor that actually exists.
