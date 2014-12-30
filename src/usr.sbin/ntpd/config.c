@@ -101,8 +101,14 @@ host_dns1(const char *s, struct ntp_addr **hn, int notauth)
 	hints.ai_socktype = SOCK_DGRAM; /* DUMMY */
 	hints.ai_flags = AI_ADDRCONFIG;
 	error = getaddrinfo(s, NULL, &hints, &res0);
-	if (error == EAI_AGAIN || error == EAI_NODATA || error == EAI_NONAME)
-			return (0);
+	switch (error) {
+	case EAI_AGAIN:
+	case EAI_NONAME:
+#ifdef EAI_NODATA
+	case EAI_NODATA:
+#endif
+		return (0);
+	}
 	if (error) {
 		log_warnx("could not parse \"%s\": %s", s,
 		    gai_strerror(error));
