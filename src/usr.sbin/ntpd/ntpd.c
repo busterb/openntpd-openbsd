@@ -90,6 +90,18 @@ sighdlr(int sig)
 	}
 }
 
+void
+writepid(struct ntpd_conf *lconf)
+{
+	if (lconf->pid_file != NULL) {
+		FILE *f = fopen(lconf->pid_file, "w");
+		if (f == NULL)
+			fatal("couldn't open pid file");
+		fprintf(f, "%ld\n", (long) getpid());
+		fclose(f);
+	}
+}
+
 __dead void
 usage(void)
 {
@@ -99,7 +111,7 @@ usage(void)
 		fprintf(stderr,
 		    "usage: ntpctl -s all | peers | Sensors | status\n");
 	else
-		fprintf(stderr, "usage: %s [-dnv] [-f file]\n",
+		fprintf(stderr, "usage: %s [-dnv] [-f file] [-p file]\n",
 		    __progname);
 	exit(1);
 }
@@ -151,7 +163,7 @@ main(int argc, char *argv[])
 
 	memset(&lconf, 0, sizeof(lconf));
 
-	while ((ch = getopt(argc, argv, "df:nP:sSv")) != -1) {
+	while ((ch = getopt(argc, argv, "df:np:P:sSv")) != -1) {
 		switch (ch) {
 		case 'd':
 			lconf.debug = 1;
@@ -165,6 +177,9 @@ main(int argc, char *argv[])
 			break;
 		case 'P':
 			pname = optarg;
+			break;
+		case 'p':
+			lconf.pid_file = optarg;
 			break;
 		case 's':
 		case 'S':
@@ -244,9 +259,11 @@ main(int argc, char *argv[])
 	logdest = lconf.debug ? LOG_TO_STDERR : LOG_TO_SYSLOG;
 	if (!lconf.settime) {
 		log_init(logdest, lconf.verbose, LOG_DAEMON);
-		if (!lconf.debug)
+		if (!lconf.debug) {
 			if (daemon(1, 0))
 				fatal("daemon");
+			writepid(&lconf);
+		}
 	} else {
 		settime_deadline = getmonotime();
 		timeout = 100;
@@ -332,9 +349,11 @@ main(int argc, char *argv[])
 			log_init(logdest, lconf.verbose, LOG_DAEMON);
 			log_warnx("no reply received in time, skipping initial "
 			    "time setting");
-			if (!lconf.debug)
+			if (!lconf.debug) {
 				if (daemon(1, 0))
 					fatal("daemon");
+				writepid(&lconf);
+			}
 		}
 
 		if (nfds > 0 && (pfd[PFD_PIPE].revents & POLLOUT))
@@ -373,6 +392,8 @@ main(int argc, char *argv[])
 	imsgbuf_clear(ibuf);
 	free(ibuf);
 	log_info("Terminating");
+	if (lconf.pid_file != NULL)
+		unlink(lconf.pid_file);
 	return (0);
 }
 
@@ -435,9 +456,11 @@ dispatch_imsg(struct ntpd_conf *lconf, int argc, char **argv)
 			memcpy(&d, imsg.data, sizeof(d));
 			ntpd_settime(d);
 			/* daemonize now */
-			if (!lconf->debug)
+			if (!lconf->debug) {
 				if (daemon(1, 0))
 					fatal("daemon");
+				writepid(lconf);
+			}
 			lconf->settime = 0;
 			timeout = INFTIM;
 			break;
