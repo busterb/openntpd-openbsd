@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/sysctl.h>
 #include <sys/wait.h>
 #include <sys/un.h>
@@ -257,6 +258,9 @@ main(int argc, char *argv[])
 
 	if (chdir("/") == -1)
 		fatal("chdir(\"/\")");
+
+	if (mkdir(RUNSTATEDIR, 0755) == -1 && errno != EEXIST)
+		fatal("mkdir %s", RUNSTATEDIR);
 
 	signal(SIGCHLD, sighdlr);
 
