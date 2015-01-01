@@ -36,10 +36,17 @@
 
 #define MAXIMUM(a, b)	((a) > (b) ? (a) : (b))
 
+#ifndef NTPD_USER
 #define	NTPD_USER	"_ntp"
-#define	CONFFILE	"/etc/ntpd.conf"
-#define DRIFTFILE	"/var/db/ntpd.drift"
-#define	CTLSOCKET	"/var/run/ntpd.sock"
+#endif
+
+#ifndef	SYSCONFDIR
+#define	SYSCONFDIR	"/etc"
+#endif
+#define	CONFFILE	SYSCONFDIR "/ntpd.conf"
+
+#define	DRIFTFILE	LOCALSTATEDIR "/ntpd.drift"
+#define	CTLSOCKET	RUNSTATEDIR "/ntpd.sock"
 
 #define	INTERVAL_QUERY_NORMAL		30	/* sync to peers every n secs */
 #define	INTERVAL_QUERY_PATHETIC		60
