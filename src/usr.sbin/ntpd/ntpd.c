@@ -134,6 +134,13 @@ auto_preconditions(const struct ntpd_conf *cnf)
 #define PFD_PIPE		0
 #define PFD_MAX			1
 
+/* Saves a copy of argv for setproctitle emulation */
+#ifndef HAVE_SETPROCTITLE
+static char **saved_argv;
+#endif
+
+char *get_progname(char *argv0);
+
 int
 main(int argc, char *argv[])
 {
@@ -154,6 +161,8 @@ main(int argc, char *argv[])
 	time_t			 settime_deadline = 0;
 	int			 sopt = 0;
 
+	__progname = get_progname(argv[0]);
+
 	if (strcmp(__progname, "ntpctl") == 0) {
 		ctl_main(argc, argv);
 		/* NOTREACHED */
@@ -162,6 +171,17 @@ main(int argc, char *argv[])
 	conffile = CONFFILE;
 
 	memset(&lconf, 0, sizeof(lconf));
+
+#ifndef HAVE_SETPROCTITLE
+	/* Prepare for later setproctitle emulation */
+	saved_argv = calloc(argc + 1, sizeof(*saved_argv));
+	for (i = 0; i < argc; i++)
+		saved_argv[i] = strdup(argv[i]);
+	saved_argv[i] = NULL;
+	compat_init_setproctitle(argc, argv);
+	argv = saved_argv;
+	argv0 = argv;
+#endif
 
 	while ((ch = getopt(argc, argv, "df:np:P:sSv")) != -1) {
 		switch (ch) {
