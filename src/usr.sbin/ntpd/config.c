@@ -187,6 +187,9 @@ new_constraint(void)
 	p->id = ++constraint_maxid;
 	p->fd = -1;
 
+#ifndef HAVE_LIBTLS
+	log_warnx("constraint configured without libtls support");
+#endif
 	return (p);
 }
 

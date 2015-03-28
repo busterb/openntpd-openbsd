@@ -216,8 +216,15 @@ authenticated constraint,
 thereby reducing the impact of unauthenticated NTP
 man-in-the-middle attacks.
 Received NTP packets with time information falling outside of a range
-near the constraint will be discarded and such NTP servers
-will be marked as invalid.
+near the constraint will be discarded and such NTP servers will be marked as
+invalid.
+.Pp
+Support for constraints is only available if
+.Xr ntpd 8
+has been linked with libtls from LibreSSL. Configuring a constraint
+without libtls causes
+.Xr ntpd 8
+to log a warning message on startup.
 .Bl -tag -width Ds
 .It Ic constraint from Ar url [ip...]
 Specify the URL, IP address or the hostname of an HTTPS server to
