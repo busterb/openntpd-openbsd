@@ -58,6 +58,7 @@ const char     *ctl_lookup_option(char *, const char **);
 void		show_status_msg(struct imsg *);
 void		show_peer_msg(struct imsg *, int);
 void		show_sensor_msg(struct imsg *, int);
+void		update_time_sync_status(int);
 
 volatile sig_atomic_t	 quit = 0;
 volatile sig_atomic_t	 reconfig = 0;
@@ -530,6 +531,7 @@ ntpd_adjtime(double d)
 	else if (!firstadj && olddelta.tv_sec == 0 && olddelta.tv_usec == 0)
 		synced = 1;
 	firstadj = 0;
+	update_time_sync_status(synced);
 	return (synced);
 }
 
