@@ -192,10 +192,12 @@ client_query(struct ntp_peer *p)
 		if (p->addr->ss.ss_family == AF_INET && setsockopt(p->query.fd,
 		    IPPROTO_IP, IP_TOS, &val, sizeof(val)) == -1)
 			log_warn("setsockopt IPTOS_LOWDELAY");
+#ifdef SO_TIMESTAMP
 		val = 1;
 		if (setsockopt(p->query.fd, SOL_SOCKET, SO_TIMESTAMP,
 		    &val, sizeof(val)) == -1)
 			fatal("setsockopt SO_TIMESTAMP");
+#endif
 	}
 
 	/*
@@ -288,7 +290,9 @@ client_dispatch(struct ntp_peer *p, u_int8_t settime, u_int8_t automatic)
 		struct cmsghdr	hdr;
 		char		buf[CMSG_SPACE(sizeof(tv))];
 	} cmsgbuf;
+#ifdef SO_TIMESTAMP
 	struct cmsghdr		*cmsg;
+#endif
 	ssize_t			 size;
 	double			 T1, T2, T3, T4, offset, delay;
 	time_t			 interval;
@@ -325,6 +329,8 @@ client_dispatch(struct ntp_peer *p, u_int8_t settime, u_int8_t automatic)
 		return (0);
 	}
 
+#ifdef SO_TIMESTAMP
+	T4 = getoffset();
 	for (cmsg = CMSG_FIRSTHDR(&somsg); cmsg != NULL;
 	    cmsg = CMSG_NXTHDR(&somsg, cmsg)) {
 		if (cmsg->cmsg_level == SOL_SOCKET &&
@@ -336,6 +342,9 @@ client_dispatch(struct ntp_peer *p, u_int8_t settime, u_int8_t automatic)
 	}
 	if (cmsg == NULL)
 		fatal("SCM_TIMESTAMP");
+#else
+	T4 = gettime_corrected();
+#endif
 
 	ntp_getmsg((struct sockaddr *)&p->addr->ss, buf, size, &msg);
 
