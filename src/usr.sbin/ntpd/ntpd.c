@@ -643,6 +643,7 @@ writefreq(double d)
 {
 	int r;
 	static int warnonce = 1;
+        int off;
 
 	if (freqfp == NULL)
 		return 0;
@@ -656,8 +657,10 @@ writefreq(double d)
 		clearerr(freqfp);
 		return 0;
 	}
-	ftruncate(fileno(freqfp), ftello(freqfp));
-	fsync(fileno(freqfp));
+        off = ftello(freqfp);
+        if (off == -1 || ftruncate(fileno(freqfp), off) == -1)
+                log_warnx("can't truncate %s", DRIFTFILE);
+        fsync(fileno(freqfp));
 	return 1;
 }
 
