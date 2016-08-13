@@ -42,6 +42,9 @@ setup_listeners(struct servent *se, struct ntpd_conf *lconf, u_int *cnt)
 	size_t			 sa6len = sizeof(struct in6_addr);
 	u_int			 new_cnt = 0;
 	int			 tos = IPTOS_LOWDELAY;
+#ifdef IPV6_V6ONLY
+	int			 on = 1;
+#endif
 #ifdef SO_RTABLE
 	int			 rdomain = 0;
 #endif
@@ -133,6 +136,12 @@ setup_listeners(struct servent *se, struct ntpd_conf *lconf, u_int *cnt)
 		if (la->sa.ss_family == AF_INET && setsockopt(la->fd,
 		    IPPROTO_IP, IP_TOS, &tos, sizeof(tos)) == -1)
 			log_warn("setsockopt IPTOS_LOWDELAY");
+
+#ifdef IPV6_V6ONLY
+		if (la->sa.ss_family == AF_INET6 && setsockopt(la->fd,
+		    IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1)
+			log_warn("setsockopt IPV6_V6ONLY");
+#endif
 
 #ifdef SO_RTABLE
 		if (la->rtable != -1 &&
