@@ -21,7 +21,9 @@
 #include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#ifdef KERN_SECURELVL
 #include <sys/sysctl.h>
+#endif
 #include <sys/wait.h>
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -120,12 +122,14 @@ usage(void)
 int
 auto_preconditions(const struct ntpd_conf *cnf)
 {
-	int mib[2] = { CTL_KERN, KERN_SECURELVL };
-	int constraints, securelevel;
-	size_t sz = sizeof(int);
+	int constraints, securelevel = 0;
 
+#ifdef KERN_SECURELVL
+	int mib[2] = { CTL_KERN, KERN_SECURELVL };
+	size_t sz = sizeof(int);
 	if (sysctl(mib, 2, &securelevel, &sz, NULL, 0) == -1)
 		err(1, "sysctl");
+#endif
 	constraints = !TAILQ_EMPTY(&cnf->constraints);
 	return !cnf->settime && (constraints || cnf->trusted_peers ||
 	    conf->trusted_sensors) && securelevel == 0;
