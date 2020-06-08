@@ -224,14 +224,16 @@ probe_root_ns(void)
 	old_options = _res.options;
 	_res.retrans = 1;
 	_res.retry = 1;
+#ifdef RES_USE_CD
 	_res.options |= RES_USE_CD;
-		
+#endif
+
 	ret = res_query(".", C_IN, T_NS, buf, sizeof(buf));
 
 	_res.retrans = old_retrans;
 	_res.retry = old_retry;
 	_res.options = old_options;
-	
+
 	return ret;
 }
 
