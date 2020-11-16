@@ -550,7 +550,7 @@ ntp_dispatch_imsg_dns(void)
 	u_int16_t		 dlen;
 	u_char			*p;
 	struct ntp_addr		*h;
-	size_t			 addrcount, peercount;
+	size_t			 addrcount, peercount = 0;
 	int			 n;
 
 	if (imsgbuf_read(ibuf_dns) != 1)
