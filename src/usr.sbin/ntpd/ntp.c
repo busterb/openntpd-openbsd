@@ -121,7 +121,7 @@ ntp_main(struct ntpd_conf *nconf, struct passwd *pw, int argc, char **argv)
 	}
 	if (stb.st_uid != 0 || (stb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
 		fatalx("bad privsep dir %s permissions: %o",
-		    pw->pw_dir, stb.st_mode);
+		    pw->pw_dir, (unsigned int)stb.st_mode);
 	}
 	if (chroot(pw->pw_dir) == -1)
 		fatal("chroot");
