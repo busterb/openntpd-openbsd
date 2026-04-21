@@ -376,7 +376,12 @@ priv_constraint_child(const char *pw_dir, uid_t pw_uid, gid_t pw_gid)
 
 #ifdef HAVE_LIBTLS
 	/* load CA certs before chroot() */
-	if ((conf->ca = tls_load_file(tls_default_ca_cert_file(),
+	if ((conf->ca = tls_load_file(
+#ifdef CONSTRAINT_CA
+	    CONSTRAINT_CA,
+#else
+	    tls_default_ca_cert_file(),
+#endif
 	    &conf->ca_len, NULL)) == NULL)
 		fatalx("failed to load constraint ca");
 #endif
