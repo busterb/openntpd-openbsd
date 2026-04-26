@@ -56,7 +56,7 @@ Use
 .Ar file
 as the configuration file,
 instead of the default
-.Pa /etc/ntpd.conf .
+.Pa @sysconfdir@/ntpd.conf .
 .It Fl n
 Configtest mode.
 Only check the configuration file for validity.
@@ -118,15 +118,15 @@ starts up, it reads settings from its configuration file,
 typically
 .Xr ntpd.conf 5 ,
 and its initial clock drift from
-.Pa /var/db/ntpd.drift .
+.Pa @localstatedir@/ntpd.drift .
 Clock drift is periodically written to the drift file thereafter.
 .Sh FILES
-.Bl -tag -width "/var/db/ntpd.driftXXX" -compact
-.It Pa /etc/ntpd.conf
+.Bl -tag -width "@localstatedir@/ntpd.driftXX" -compact
+.It Pa @sysconfdir@/ntpd.conf
 Default configuration file.
-.It Pa /var/db/ntpd.drift
+.It Pa @localstatedir@/ntpd.drift
 Drift file.
-.It Pa /var/run/ntpd.sock
+.It Pa @runstatedir@/ntpd.sock
 Socket file for communication with
 .Xr ntpctl 8 .
 .El
