@@ -489,6 +489,9 @@ dispatch_imsg(struct ntpd_conf *lconf, int argc, char **argv)
 			lconf->settime = 0;
 			timeout = INFTIM;
 			break;
+		case IMSG_UNSYNCED:
+			update_time_sync_status(0);
+			break;
 		case IMSG_CONSTRAINT_QUERY:
 			priv_constraint_msg(imsg.hdr.peerid,
 			    imsg.data, imsg.hdr.len - IMSG_HEADER_SIZE,
