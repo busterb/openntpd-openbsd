@@ -22,6 +22,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
+#include <grp.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -102,6 +103,18 @@ control_init(char *path)
 		(void)unlink(path);
 		return (-1);
 	}
+
+#ifdef NTPD_GROUP
+	struct group *gr;
+	if ((gr = getgrnam(NTPD_GROUP)) == NULL)
+		fatalx("unknown group %s", NTPD_GROUP);
+	if (chown(path, -1, gr->gr_gid) == -1) {
+		log_warn("control_init: chown");
+		close(fd);
+		(void)unlink(path);
+		return (-1);
+	}
+#endif
 
 	session_socket_nonblockmode(fd);
 
